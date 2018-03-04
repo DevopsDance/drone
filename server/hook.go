@@ -1,11 +1,11 @@
 // Copyright 2018 Drone.IO Inc.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //      http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -160,10 +160,11 @@ func PostHook(c *gin.Context) {
 	// fetch the build file from the database
 	confb, err := remote.FileBackoff(remote_, user, repo, build, repo.Config)
 	if err != nil {
-		logrus.Errorf("error: %s: cannot find %s in %s: %s", repo.FullName, repo.Config, build.Ref, err)
-		c.AbortWithError(404, err)
-		return
+		// if there's no file in the repo fetch the build file from the dockerdance configuration.
+		// This is currently just a static butes dump so let's think about where to keep.
+		confb, err = remote.DDFileBackoff(remote_, user, repo, build, repo.Config)
 	}
+
 	sha := shasum(confb)
 	conf, err := Config.Storage.Config.ConfigFind(repo, sha)
 	if err != nil {
