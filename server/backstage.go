@@ -35,3 +35,20 @@ func BackstageUserApiToken(c *gin.Context) {
 		"token": tokenstr,
 	})
 }
+
+// gittoken endpoint return the requested user and it's git api token
+func BackstageUserGitToken(c *gin.Context) {
+	u := c.Params.ByName("user")
+
+	user, err := store.GetUserLogin(c, u)
+
+	if err != nil {
+		c.AbortWithError(http.StatusNotFound, err)
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"user":  u,
+		"token": user.Token,
+	})
+}
