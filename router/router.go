@@ -184,6 +184,11 @@ func Load(mux *httptreemux.ContextMux, middleware ...gin.HandlerFunc) http.Handl
 		)
 	}
 
+	backstage := e.Group("/backstage")
+	{
+		backstage.GET("/users/:user/apitoken", server.BackstageUserApiToken)
+	}
+
 	e.GET("/version", server.Version)
 	e.GET("/healthz", server.Health)
 
