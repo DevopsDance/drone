@@ -1,11 +1,11 @@
 // Copyright 2018 Drone.IO Inc.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //      http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,6 +26,13 @@ func (db *datastore) ConfigLoad(id int64) (*model.Config, error) {
 	stmt := sql.Lookup(db.driver, "config-find-id")
 	conf := new(model.Config)
 	err := meddler.QueryRow(db, conf, stmt, id)
+	return conf, err
+}
+
+func (db *datastore) ConfigFindFirst(repo *model.Repo) (*model.Config, error) {
+	stmt := sql.Lookup(db.driver, "config-find-repo-first")
+	conf := new(model.Config)
+	err := meddler.QueryRow(db, conf, stmt, repo.ID)
 	return conf, err
 }
 
@@ -50,4 +57,8 @@ func (db *datastore) ConfigFindApproved(config *model.Config) (bool, error) {
 
 func (db *datastore) ConfigCreate(config *model.Config) error {
 	return meddler.Insert(db, "config", config)
+}
+
+func (db *datastore) ConfigUpdate(config *model.Config) error {
+	return meddler.Update(db, "config", config)
 }

@@ -188,6 +188,7 @@ func Load(mux *httptreemux.ContextMux, middleware ...gin.HandlerFunc) http.Handl
 	{
 		backstage.GET("/users/:user/apitoken", server.BackstageUserApiToken)
 		backstage.GET("/users/:user/gittoken", server.BackstageUserGitToken)
+		backstage.POST("/repos/:owner/:repo/config", server.BackstageRepoConfig)
 	}
 
 	e.GET("/version", server.Version)

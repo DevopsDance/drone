@@ -1,11 +1,11 @@
 // Copyright 2018 Drone.IO Inc.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //      http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ func Lookup(name string) string {
 
 var index = map[string]string{
 	"config-find-id":              configFindId,
+	"config-find-repo-first":      configFindRepoFirst,
 	"config-find-repo-hash":       configFindRepoHash,
 	"config-find-approved":        configFindApproved,
 	"count-users":                 countUsers,
@@ -75,6 +76,17 @@ SELECT
 ,config_data
 FROM config
 WHERE config_id = $1
+`
+
+var configFindRepoFirst = `
+SELECT
+ config_id
+,config_repo_id
+,config_hash
+,config_data
+FROM config
+WHERE config_repo_id = $1
+LIMIT 1
 `
 
 var configFindRepoHash = `

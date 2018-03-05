@@ -157,33 +157,12 @@ func PostHook(c *gin.Context) {
 		}
 	}
 
-	// fetch the build file from the database
-	confb, err := remote.FileBackoff(remote_, user, repo, build, repo.Config)
+	conf, err := Config.Storage.Config.ConfigFindFirst(repo)
+
 	if err != nil {
-		// if there's no file in the repo fetch the build file from the dockerdance configuration.
-		// This is currently just a static butes dump so let's think about where to keep.
-		confb, err = remote.DDFileBackoff(remote_, user, repo, build, repo.Config)
+		c.AbortWithError(404, err)
 	}
 
-	sha := shasum(confb)
-	conf, err := Config.Storage.Config.ConfigFind(repo, sha)
-	if err != nil {
-		conf = &model.Config{
-			RepoID: repo.ID,
-			Data:   string(confb),
-			Hash:   sha,
-		}
-		err = Config.Storage.Config.ConfigCreate(conf)
-		if err != nil {
-			// retry in case we receive two hooks at the same time
-			conf, err = Config.Storage.Config.ConfigFind(repo, sha)
-			if err != nil {
-				logrus.Errorf("failure to find or persist build config for %s. %s", repo.FullName, err)
-				c.AbortWithError(500, err)
-				return
-			}
-		}
-	}
 	build.ConfigID = conf.ID
 
 	netrc, err := remote_.Netrc(user, repo)

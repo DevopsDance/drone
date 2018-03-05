@@ -8,6 +8,17 @@ SELECT
 FROM config
 WHERE config_id = $1
 
+-- name: config-find-repo-first
+
+SELECT
+ config_id
+,config_repo_id
+,config_hash
+,config_data
+FROM config
+WHERE config_repo_id = $1
+LIMIT 1
+
 -- name: config-find-repo-hash
 
 SELECT
