@@ -66,11 +66,11 @@ func BackstageUserGitToken(c *gin.Context) {
 // gittoken endpoint return the requested user and it's git api token
 func BackstageRepoConfig(c *gin.Context) {
 
-	// grab repo param
-	repostr := c.Params.ByName("repo")
-
 	// grab owner param
 	ownerstr := c.Params.ByName("owner")
+
+	// grab name param
+	namestr := c.Params.ByName("name")
 
 	var reader io.Reader = c.Request.Body
 
@@ -90,11 +90,11 @@ func BackstageRepoConfig(c *gin.Context) {
 		return
 	}
 
-	repo, err := store.GetRepoOwnerName(c, ownerstr, repostr)
+	repo, err := store.GetRepoOwnerName(c, ownerstr, namestr)
 
 	// do not store config for repository we know nothing about
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, fmt.Errorf("No such repository as %s/%s", ownerstr, repostr))
+		c.AbortWithError(http.StatusNotFound, fmt.Errorf("No such repository as %s/%s", ownerstr, namestr))
 		return
 	}
 
