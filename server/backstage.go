@@ -60,7 +60,7 @@ func BackstageUserGitToken(c *gin.Context) {
 }
 
 // gittoken endpoint return the requested user and it's git api token
-func BackstageRepoConfig(c *gin.Context) {
+func BackstageGetRepoConfig(c *gin.Context) {
 
 	// grab owner param
 	ownerstr := c.Params.ByName("owner")
@@ -74,11 +74,28 @@ func BackstageRepoConfig(c *gin.Context) {
 	// get current configuration object
 	currentconfig, err := Config.Storage.Config.ConfigFindFirst(repo)
 
-	// return current configuration if GET method
-	if c.Request.Method == "GET" {
-		c.JSON(200, *currentconfig)
+	if err != nil {
+		c.AbortWithError(http.StatusNotFound, err)
 		return
 	}
+
+	c.JSON(200, *currentconfig)
+}
+
+// gittoken endpoint return the requested user and it's git api token
+func BackstagePostRepoConfig(c *gin.Context) {
+
+	// grab owner param
+	ownerstr := c.Params.ByName("owner")
+
+	// grab name param
+	namestr := c.Params.ByName("name")
+
+	// get repo object so that we can locate related configuration
+	repo, err := store.GetRepoOwnerName(c, ownerstr, namestr)
+
+	// get current configuration object
+	currentconfig, err := Config.Storage.Config.ConfigFindFirst(repo)
 
 	// prepare new configuration object
 	repoconfig := new(model.BackstageRepoConfig)
