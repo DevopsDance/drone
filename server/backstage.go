@@ -59,6 +59,38 @@ func BackstageUserGitToken(c *gin.Context) {
 	})
 }
 
+// hooktoken endpoint return token for requested owner/repo
+func BackstageGetRepoHook(c *gin.Context) {
+
+	// grab owner param
+	ownerstr := c.Params.ByName("owner")
+
+	// grab name param
+	namestr := c.Params.ByName("name")
+
+	fullname := ownerstr + "/" + namestr
+
+	t := token.New(token.HookToken, fullname)
+
+	repo, err := store.GetRepoOwnerName(c, ownerstr, namestr)
+
+	if err != nil {
+		c.AbortWithError(http.StatusNotFound, err)
+		return
+	}
+
+	sig, err := t.Sign(repo.Hash)
+	if err != nil {
+		c.String(500, err.Error())
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"full_name": fullname,
+		"token":     sig,
+	})
+}
+
 // gittoken endpoint return the requested user and it's git api token
 func BackstageGetRepoConfig(c *gin.Context) {
 
@@ -70,6 +102,11 @@ func BackstageGetRepoConfig(c *gin.Context) {
 
 	// get repo object so that we can locate related configuration
 	repo, err := store.GetRepoOwnerName(c, ownerstr, namestr)
+
+	if err != nil {
+		c.AbortWithError(http.StatusNotFound, err)
+		return
+	}
 
 	// get current configuration object
 	currentconfig, err := Config.Storage.Config.ConfigFindFirst(repo)
