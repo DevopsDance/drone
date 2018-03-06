@@ -15,10 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const (
-	repoConfigField = "data"
-)
-
 // apitoken endpoint returns the requested user and a token signed by user.Hash
 func BackstageUserApiToken(c *gin.Context) {
 	l := c.Params.ByName("login")
@@ -72,6 +68,21 @@ func BackstageRepoConfig(c *gin.Context) {
 	// grab name param
 	namestr := c.Params.ByName("name")
 
+	// get repo object so that we can locate related configuration
+	repo, err := store.GetRepoOwnerName(c, ownerstr, namestr)
+
+	// get current configuration object
+	currentconfig, err := Config.Storage.Config.ConfigFindFirst(repo)
+
+	// return current configuration if GET method
+	if c.Request.Method == "GET" {
+		c.JSON(200, *currentconfig)
+		return
+	}
+
+	// prepare new configuration object
+	repoconfig := new(model.BackstageRepoConfig)
+
 	var reader io.Reader = c.Request.Body
 
 	raw, err := ioutil.ReadAll(reader)
@@ -81,8 +92,7 @@ func BackstageRepoConfig(c *gin.Context) {
 		return
 	}
 
-	repoconfig := new(model.BackstageRepoConfig)
-
+	// unmarshal payload
 	err = json.Unmarshal(raw, repoconfig)
 
 	if err != nil {
@@ -90,24 +100,25 @@ func BackstageRepoConfig(c *gin.Context) {
 		return
 	}
 
-	repo, err := store.GetRepoOwnerName(c, ownerstr, namestr)
-
 	// do not store config for repository we know nothing about
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, fmt.Errorf("No such repository as %s/%s", ownerstr, namestr))
 		return
 	}
 
-	confb, _ := base64.StdEncoding.DecodeString(repoconfig.Data)
+	// decode base64 encoded configuration
+	confb, decerr := base64.StdEncoding.DecodeString(repoconfig.Data)
+
+	if decerr != nil {
+		c.AbortWithError(http.StatusInternalServerError, decerr)
+		return
+	}
 
 	conf := &model.Config{
 		RepoID: repo.ID,
 		Data:   string(confb),
 		Hash:   shasum(confb),
 	}
-
-	// get current configuration object
-	currentconfig, err := Config.Storage.Config.ConfigFindFirst(repo)
 
 	// update conf object with the found configuration so we can properly execute ConfigUpdate
 	if err == nil {
