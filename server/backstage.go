@@ -21,9 +21,9 @@ const (
 
 // apitoken endpoint returns the requested user and a token signed by user.Hash
 func BackstageUserApiToken(c *gin.Context) {
-	u := c.Params.ByName("user")
+	l := c.Params.ByName("login")
 
-	user, err := store.GetUserLogin(c, u)
+	user, err := store.GetUserLogin(c, l)
 
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, err)
@@ -41,16 +41,16 @@ func BackstageUserApiToken(c *gin.Context) {
 
 	// Enjoy!
 	c.JSON(200, gin.H{
-		"user":  u,
+		"login": l,
 		"token": tokenstr,
 	})
 }
 
 // gittoken endpoint return the requested user and it's git api token
 func BackstageUserGitToken(c *gin.Context) {
-	u := c.Params.ByName("user")
+	l := c.Params.ByName("login")
 
-	user, err := store.GetUserLogin(c, u)
+	user, err := store.GetUserLogin(c, l)
 
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, err)
@@ -58,7 +58,7 @@ func BackstageUserGitToken(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"user":  u,
+		"login": l,
 		"token": user.Token,
 	})
 }
