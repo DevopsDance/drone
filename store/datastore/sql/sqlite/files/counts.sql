@@ -13,3 +13,15 @@ WHERE repo_active = 1
 
 SELECT count(1)
 FROM builds
+
+-- name: count-builds-failed
+
+SELECT count(1)
+FROM builds
+WHERE build_status == "failure"
+
+-- name: count-builds-succeded
+
+SELECT count(1)
+FROM builds
+WHERE build_status == "success"

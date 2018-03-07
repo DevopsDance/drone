@@ -225,3 +225,31 @@ func BackstagePostRepoConfig(c *gin.Context) {
 
 	c.JSON(200, *conf)
 }
+
+// /stats/builds/failed endpoint return total number of system wide failed builds
+func BackstageStatsFailedBuildsCount(c *gin.Context) {
+	count, err := store.GetBuildFailedCount(c)
+
+	if err != nil {
+		c.String(500, err.Error())
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"value": count,
+	})
+}
+
+// /stats/builds/succeeded endpoint return total number of system wide succeeded builds
+func BackstageStatsSucceededBuildsCount(c *gin.Context) {
+	count, err := store.GetBuildSucceededCount(c)
+
+	if err != nil {
+		c.String(500, err.Error())
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"value": count,
+	})
+}

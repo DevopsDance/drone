@@ -27,6 +27,8 @@ var index = map[string]string{
 	"count-users":                 countUsers,
 	"count-repos":                 countRepos,
 	"count-builds":                countBuilds,
+	"count-builds-failed":         countBuildsFailed,
+	"count-builds-succeeded":      countBuildsSucceeded,
 	"feed-latest-build":           feedLatestBuild,
 	"feed":                        feed,
 	"files-find-build":            filesFindBuild,
@@ -122,6 +124,18 @@ WHERE repo_active = 1
 var countBuilds = `
 SELECT count(1)
 FROM builds
+`
+
+var countBuildsFailed = `
+SELECT count(1)
+FROM builds
+WHERE build_status == "failure"
+`
+
+var countBuildsSucceeded = `
+SELECT count(1)
+FROM builds
+WHERE build_status == "success"
 `
 
 var feedLatestBuild = `

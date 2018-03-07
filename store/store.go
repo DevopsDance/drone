@@ -89,6 +89,12 @@ type Store interface {
 	// GetBuildCount gets a count of all builds in the system.
 	GetBuildCount() (int, error)
 
+	// GetBuildFailedCount gets a count of all failed builds in the system.
+	GetBuildFailedCount() (int, error)
+
+	// GetBuildSucceededCount gets a count of all succeeded builds in the system.
+	GetBuildSucceededCount() (int, error)
+
 	// CreateBuild creates a new build and jobs.
 	CreateBuild(*model.Build, ...*model.Proc) error
 
@@ -253,4 +259,12 @@ func CreateBuild(c context.Context, build *model.Build, procs ...*model.Proc) er
 
 func UpdateBuild(c context.Context, build *model.Build) error {
 	return FromContext(c).UpdateBuild(build)
+}
+
+func GetBuildFailedCount(c context.Context) (int, error) {
+	return FromContext(c).GetBuildFailedCount()
+}
+
+func GetBuildSucceededCount(c context.Context) (int, error) {
+	return FromContext(c).GetBuildSucceededCount()
 }

@@ -191,6 +191,8 @@ func Load(mux *httptreemux.ContextMux, middleware ...gin.HandlerFunc) http.Handl
 		backstage.POST("/repos/:owner/:name/config", server.BackstagePostRepoConfig)
 		backstage.GET("/repos/:owner/:name/config", server.BackstageGetRepoConfig)
 		backstage.GET("/repos/:owner/:name/hooktoken", server.BackstageGetRepoHook)
+		backstage.GET("/stats/builds/succeeded", server.BackstageStatsSucceededBuildsCount)
+		backstage.GET("/stats/builds/failed", server.BackstageStatsFailedBuildsCount)
 	}
 
 	e.GET("/version", server.Version)
