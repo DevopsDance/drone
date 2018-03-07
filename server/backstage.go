@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/drone/drone/model"
@@ -15,8 +16,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func whitelistedRemoteAddr(c *gin.Context) bool {
+	remoteip := strings.Split(c.Request.RemoteAddr, ":")[0]
+
+	if remoteip != Config.Backstage.WhitelistedRemoteAddr {
+		return false
+	}
+
+	return true
+}
+
 // apitoken endpoint returns the requested user and a token signed by user.Hash
 func BackstageUserApiToken(c *gin.Context) {
+
+	if !whitelistedRemoteAddr(c) {
+		c.AbortWithError(http.StatusNotFound, fmt.Errorf("Unprivileged access from %s", c.Request.RemoteAddr))
+		return
+	}
+
 	l := c.Params.ByName("login")
 
 	user, err := store.GetUserLogin(c, l)
@@ -44,6 +61,12 @@ func BackstageUserApiToken(c *gin.Context) {
 
 // gittoken endpoint return the requested user and it's git api token
 func BackstageUserGitToken(c *gin.Context) {
+
+	if !whitelistedRemoteAddr(c) {
+		c.AbortWithError(http.StatusNotFound, fmt.Errorf("Unprivileged access from %s", c.Request.RemoteAddr))
+		return
+	}
+
 	l := c.Params.ByName("login")
 
 	user, err := store.GetUserLogin(c, l)
@@ -61,6 +84,11 @@ func BackstageUserGitToken(c *gin.Context) {
 
 // hooktoken endpoint return token for requested owner/repo
 func BackstageGetRepoHook(c *gin.Context) {
+
+	if !whitelistedRemoteAddr(c) {
+		c.AbortWithError(http.StatusNotFound, fmt.Errorf("Unprivileged access from %s", c.Request.RemoteAddr))
+		return
+	}
 
 	// grab owner param
 	ownerstr := c.Params.ByName("owner")
@@ -94,6 +122,11 @@ func BackstageGetRepoHook(c *gin.Context) {
 // gittoken endpoint return the requested user and it's git api token
 func BackstageGetRepoConfig(c *gin.Context) {
 
+	if !whitelistedRemoteAddr(c) {
+		c.AbortWithError(http.StatusNotFound, fmt.Errorf("Unprivileged access from %s", c.Request.RemoteAddr))
+		return
+	}
+
 	// grab owner param
 	ownerstr := c.Params.ByName("owner")
 
@@ -121,6 +154,11 @@ func BackstageGetRepoConfig(c *gin.Context) {
 
 // gittoken endpoint return the requested user and it's git api token
 func BackstagePostRepoConfig(c *gin.Context) {
+
+	if !whitelistedRemoteAddr(c) {
+		c.AbortWithError(http.StatusNotFound, fmt.Errorf("Unprivileged access from %s", c.Request.RemoteAddr))
+		return
+	}
 
 	// grab owner param
 	ownerstr := c.Params.ByName("owner")

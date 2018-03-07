@@ -1,11 +1,11 @@
 // Copyright 2018 Drone.IO Inc.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //      http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -488,6 +488,12 @@ var flags = []cli.Flag{
 		Name:   "keepalive-min-time",
 		Usage:  "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
 	},
+	cli.StringFlag{
+		EnvVar: "BACKSTAGE_WHITELISTED_IP",
+		Name:   "backstage-whitelisted-ip",
+		Usage:  "backstage access limited to whitelisted IP address",
+		Value:  "127.0.0.1",
+	},
 }
 
 func server(c *cli.Context) error {
@@ -682,6 +688,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	droneserver.Config.Pipeline.Networks = c.StringSlice("network")
 	droneserver.Config.Pipeline.Volumes = c.StringSlice("volume")
 	droneserver.Config.Pipeline.Privileged = c.StringSlice("escalate")
+	droneserver.Config.Backstage.WhitelistedRemoteAddr = c.String("backstage-whitelisted-ip")
 	// droneserver.Config.Server.Open = cli.Bool("open")
 	// droneserver.Config.Server.Orgs = sliceToMap(cli.StringSlice("orgs"))
 	// droneserver.Config.Server.Admins = sliceToMap(cli.StringSlice("admin"))
