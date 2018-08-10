@@ -1,8 +1,6 @@
 package server
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -172,20 +170,9 @@ func BackstagePostRepoConfig(c *gin.Context) {
 	// get current configuration object
 	currentconfig, err := Config.Storage.Config.ConfigFindFirst(repo)
 
-	// prepare new configuration object
-	repoconfig := new(model.BackstageRepoConfig)
-
 	var reader io.Reader = c.Request.Body
 
 	raw, err := ioutil.ReadAll(reader)
-
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	// unmarshal payload
-	err = json.Unmarshal(raw, repoconfig)
 
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -198,24 +185,22 @@ func BackstagePostRepoConfig(c *gin.Context) {
 		return
 	}
 
-	// decode base64 encoded configuration
-	confb, decerr := base64.StdEncoding.DecodeString(repoconfig.Data)
-
-	if decerr != nil {
-		c.AbortWithError(http.StatusInternalServerError, decerr)
-		return
-	}
-
 	conf := &model.Config{
 		RepoID: repo.ID,
-		Data:   string(confb),
-		Hash:   shasum(confb),
+		Data:   string(raw),
+		Hash:   shasum(raw),
 	}
 
 	// update conf object with the found configuration so we can properly execute ConfigUpdate
-	if err == nil {
+	if currentconfig.ID > 0 {
 		conf.ID = currentconfig.ID
 		err = Config.Storage.Config.ConfigUpdate(conf)
+
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
 		c.JSON(200, *conf)
 		return
 	}
